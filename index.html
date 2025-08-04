@@ -222,6 +222,14 @@
             document.body.style.backgroundImage = `url('${newTheme.image}')`;
             document.documentElement.style.setProperty('--accent-color', newTheme.accent);
         }
+
+        // Preload images for smooth transitions
+        function preloadImages() {
+            themes.forEach(theme => {
+                const img = new Image();
+                img.src = theme.image;
+            });
+        }
         
         // --- Date Formatting ---
         const getFormattedDate = (date) => date.toISOString().split('T')[0];
@@ -416,6 +424,7 @@
 
         // --- Initial Load Function ---
         const initializeDashboard = () => {
+            preloadImages(); // Preload images for smoother transitions
             loadTasks();
             carryOverTasks();
             displayDate(currentDate);

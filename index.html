@@ -32,6 +32,7 @@
             justify-content: center;
             padding: 3rem 2rem;
             position: relative;
+            background-color: var(--bg-color); /* Fallback color */
             background-size: cover;
             background-position: center;
             transition: background-image 1.5s ease-in-out;
@@ -189,7 +190,6 @@
         const taskInput = document.getElementById('task-input');
         const taskPriorityInput = document.getElementById('task-priority');
         const taskList = document.getElementById('task-list');
-        // ... other references
         const currentDateEl = document.getElementById('current-date');
         const prevDayBtn = document.getElementById('prev-day');
         const nextDayBtn = document.getElementById('next-day');
@@ -214,21 +214,30 @@
             { image: 'https://images.unsplash.com/photo-1562624326-30002161163d?q=80&w=2070&auto=format&fit=crop', accent: '#FFB74D' },
             { image: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop', accent: '#BA68C8' }
         ];
-        let currentThemeIndex = 0;
+        let currentThemeIndex = -1;
         
-        function changeTheme() {
+        function changeTheme(isInitial = false) {
             currentThemeIndex = (currentThemeIndex + 1) % themes.length;
             const newTheme = themes[currentThemeIndex];
-            document.body.style.backgroundImage = `url('${newTheme.image}')`;
-            document.documentElement.style.setProperty('--accent-color', newTheme.accent);
+            
+            if (isInitial) {
+                const img = new Image();
+                img.onload = () => {
+                    document.body.style.backgroundImage = `url('${newTheme.image}')`;
+                    document.documentElement.style.setProperty('--accent-color', newTheme.accent);
+                };
+                img.src = newTheme.image;
+            } else {
+                 document.body.style.backgroundImage = `url('${newTheme.image}')`;
+                 document.documentElement.style.setProperty('--accent-color', newTheme.accent);
+            }
         }
 
-        // Preload images for smooth transitions
-        function preloadImages() {
-            themes.forEach(theme => {
+        function preloadSubsequentImages() {
+            for (let i = 1; i < themes.length; i++) {
                 const img = new Image();
-                img.src = theme.image;
-            });
+                img.src = themes[i].image;
+            }
         }
         
         // --- Date Formatting ---
@@ -246,7 +255,6 @@
             taskList.innerHTML = '';
             let dayTasks = tasks[dateKey] || [];
             
-            // Sort tasks by priority
             const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
             dayTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
@@ -343,7 +351,7 @@
         };
 
         // --- YouTube Player ---
-        const YOUTUBE_API_KEY = "AIzaSyB9ypBnuHbIP0akm4QBnaiBDr9NL-FEfeM"; // <-- PASTE YOUR YOUTUBE DATA API v3 KEY HERE
+        const YOUTUBE_API_KEY = ""; // <-- PASTE YOUR YOUTUBE DATA API v3 KEY HERE
         async function searchAndPlayYoutube(query) {
             if (!YOUTUBE_API_KEY) {
                 youtubeSearchInput.value = "";
@@ -424,7 +432,6 @@
 
         // --- Initial Load Function ---
         const initializeDashboard = () => {
-            preloadImages(); // Preload images for smoother transitions
             loadTasks();
             carryOverTasks();
             displayDate(currentDate);
@@ -432,8 +439,13 @@
             loadYoutubeUrl();
             loadQuickLinks();
             renderQuickLinks();
-            changeTheme(); // Set initial theme
-            setInterval(changeTheme, 60000); // Change theme every 60 seconds
+            
+            // Set initial theme smoothly and preload others
+            changeTheme(true); 
+            preloadSubsequentImages();
+            
+            // Start rotating themes after the first one is set
+            setInterval(changeTheme, 60000); 
         };
         initializeDashboard();
     });

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Dash</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F5EBE0;
+            --text-color: #5D4037;
+            --subtle-text-color: #A1887F;
+            --accent-color: #E57373;
+            --border-color: #D7CCC8;
+            --card-bg: rgba(255, 255, 255, 0.5);
+        }
+
+        /* --- Base Styles & Animated Background --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            padding: 3rem 2rem;
+            position: relative;
+            /* overflow: hidden; <-- This was the issue, it has been removed */
+        }
+
+        .background-shapes div {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape1 {
+            width: 200px;
+            height: 200px;
+            background: #E57373;
+            top: 10%;
+            left: 15%;
+            animation-duration: 25s;
+        }
+
+        .shape2 {
+            width: 150px;
+            height: 150px;
+            background: #81C784;
+            bottom: 15%;
+            right: 20%;
+            animation-duration: 30s;
+            animation-delay: 5s;
+        }
+        
+        .shape3 {
+             width: 100px;
+            height: 100px;
+            background: #64B5F6;
+            top: 20%;
+            right: 10%;
+            animation-duration: 20s;
+        }
+        
+         .shape4 {
+             width: 250px;
+            height: 250px;
+            background: #FFD54F;
+            bottom: 5%;
+            left: 5%;
+            animation-duration: 35s;
+            animation-delay: 2s;
+        }
+
+
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) translateX(20px) rotate(180deg); }
+            100% { transform: translateY(0px) translateX(0px) rotate(360deg); }
+        }
+
+        /* --- Main Layout --- */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            grid-template-rows: auto 1fr;
+            gap: 2.5rem;
+            align-items: start;
+            z-index: 1;
+        }
+        
+        /* --- Content Section Style --- */
+        .content-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+        
+        /* --- Header: Date Display & Navigation --- */
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding-bottom: 1rem;
+        }
+        
+        .date-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #current-date {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .nav-arrow {
+            font-size: 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            color: var(--subtle-text-color);
+            transition: color 0.2s ease;
+        }
+
+        .nav-arrow:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- To-Do List --- */
+        .todo-section {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+        }
+
+        #task-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #FFFFFF;
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        #task-input::placeholder {
+            color: var(--subtle-text-color);
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        #task-list li {
+            display: flex;
+            align-items: center;
+            padding: 14px 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+            width: 22px;
+            height: 22px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            cursor: text;
+            outline: none;
+            font-size: 1.05rem;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: var(--subtle-text-color);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--subtle-text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s, color 0.2s;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            color: #D32F2F;
+        }
+
+        /* --- Widgets Column --- */
+        .widgets-column {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+        
+        /* --- YouTube Player --- */
+        #youtube-search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #FFFFFF;
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: #E0E0E0;
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- Gemini Assistant --- */
+        #gemini-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #FFFFFF;
+            color: var(--text-color);
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            min-height: 60px;
+        }
+        #gemini-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: background-color 0.2s;
+        }
+        #gemini-submit:hover {
+            background-color: #E53935;
+        }
+        #gemini-submit:disabled {
+            background-color: var(--subtle-text-color);
+            cursor: not-allowed;
+        }
+        #gemini-response {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            .todo-section, .widgets-column {
+                grid-column: 1 / -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem 1rem;
+            }
+            .content-section {
+                padding: 1.5rem;
+            }
+            #current-date {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape1"></div>
+        <div class="shape2"></div>
+        <div class="shape3"></div>
+        <div class="shape4"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="date-container">
+                <span class="nav-arrow" id="prev-day">&lt;</span>
+                <h1 id="current-date"></h1>
+                <span class="nav-arrow" id="next-day">&gt;</span>
+            </div>
+        </header>
+
+        <!-- To-Do List -->
+        <div class="content-section todo-section">
+            <h2 class="section-title">Today's Focus</h2>
+            <input type="text" id="task-input" placeholder="Add a new task and press Enter...">
+            <ul id="task-list"></ul>
+        </div>
+
+        <!-- Widgets Column -->
+        <div class="widgets-column">
+            <!-- Gemini Assistant -->
+            <div class="content-section">
+                 <h2 class="section-title">Gemini Assistant</h2>
+                 <div>
+                     <textarea id="gemini-input" placeholder="Ask anything..." rows="3"></textarea>
+                     <button id="gemini-submit">Ask Gemini</button>
+                 </div>
+                 <div id="gemini-response">Ask a question to see the response here.</div>
+            </div>
+
+            <!-- YouTube Player -->
+            <div class="content-section">
+                <h2 class="section-title">Video Search</h2>
+                <input type="text" id="youtube-search-input" placeholder="Search YouTube and press Enter...">
+                <div class="video-wrapper">
+                    <iframe id="youtube-player" 
+                            src="" 
+                            title="YouTube video player" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Element References ---
+        const currentDateEl = document.getElementById('current-date');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+
+        // --- State Management ---
+        let currentDate = new Date();
+        let tasks = {};
+
+        // --- Date Formatting ---
+        const getFormattedDate = (date) => date.toISOString().split('T')[0];
+        const displayDate = (date) => {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.textContent = date.toLocaleDateString('en-US', options);
+        };
+
+        // --- Task Management ---
+        const saveTasks = () => localStorage.setItem('auraDashTasks', JSON.stringify(tasks));
+        const loadTasks = () => {
+            const storedTasks = localStorage.getItem('auraDashTasks');
+            tasks = storedTasks ? JSON.parse(storedTasks) : {};
+        };
+
+        const renderTasks = () => {
+            const dateKey = getFormattedDate(currentDate);
+            const todayKey = getFormattedDate(new Date());
+            const isReadOnly = dateKey !== todayKey;
+
+            taskList.innerHTML = '';
+            const dayTasks = tasks[dateKey] || [];
+
+            if (dayTasks.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No tasks for this day. Add one above!';
+                li.style.color = 'var(--subtle-text-color)';
+                li.style.justifyContent = 'center';
+                taskList.appendChild(li);
+            } else {
+                dayTasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} ${isReadOnly ? 'disabled' : ''}>
+                        <span class="task-text ${task.completed ? 'completed' : ''}" contenteditable="${!isReadOnly}">${task.text}</span>
+                        <button class="delete-btn" style="display: ${isReadOnly ? 'none' : 'inline'};">✖</button>
+                    `;
+                    taskList.appendChild(li);
+
+                    const checkbox = li.querySelector('.task-checkbox');
+                    const textSpan = li.querySelector('.task-text');
+                    const deleteBtn = li.querySelector('.delete-btn');
+
+                    checkbox.addEventListener('change', () => {
+                        tasks[dateKey][index].completed = checkbox.checked;
+                        textSpan.classList.toggle('completed', checkbox.checked);
+                        saveTasks();
+                    });
+
+                    textSpan.addEventListener('blur', () => {
+                        tasks[dateKey][index].text = textSpan.innerText;
+                        saveTasks();
+                    });
+
+                    deleteBtn.addEventListener('click', () => {
+                        tasks[dateKey].splice(index, 1);
+                        saveTasks();
+                        renderTasks();
+                    });
+                });
+            }
+            taskInput.style.display = isReadOnly ? 'none' : 'block';
+        };
+
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && taskInput.value.trim() !== '') {
+                e.preventDefault();
+                const dateKey = getFormattedDate(currentDate);
+                if (!tasks[dateKey]) tasks[dateKey] = [];
+                tasks[dateKey].push({ text: taskInput.value.trim(), completed: false });
+                taskInput.value = '';
+                saveTasks();
+                renderTasks();
+            }
+        });
+
+        // --- Day Navigation ---
+        prevDayBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            displayDate(currentDate);
+            renderTasks();
+        });
+
+        nextDayBtn.addEventListener('click', () => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (currentDate < today) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                displayDate(currentDate);
+                renderTasks();
+            }
+        });
+
+        // --- Daily Task Carry-over ---
+        const carryOverTasks = () => {
+            const lastVisitDateStr = localStorage.getItem('auraDashLastVisit');
+            const todayStr = getFormattedDate(new Date());
+
+            if (lastVisitDateStr && lastVisitDateStr !== todayStr) {
+                const yesterdayStr = getFormattedDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+                const uncompletedTasks = (tasks[yesterdayStr] || []).filter(task => !task.completed);
+                if (uncompletedTasks.length > 0 && confirm('Carry over uncompleted tasks from yesterday?')) {
+                    tasks[todayStr] = [...(tasks[todayStr] || []), ...uncompletedTasks];
+                    saveTasks();
+                }
+            }
+            localStorage.setItem('auraDashLastVisit', todayStr);
+        };
+        
+        // --- YouTube Player ---
+        const youtubePlayer = document.getElementById('youtube-player');
+        const youtubeSearchInput = document.getElementById('youtube-search-input');
+        const YOUTUBE_API_KEY = ""; // IMPORTANT: Add your YouTube Data API Key here
+
+        async function searchAndPlayYoutube(query) {
+            if (!YOUTUBE_API_KEY) {
+                // Fallback: Open search results in a new tab if no API key
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+                youtubeSearchInput.placeholder = "Add API Key to enable search";
+                return;
+            }
+            
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.items && data.items.length > 0) {
+                    const videoId = data.items[0].id.videoId;
+                    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    youtubePlayer.src = embedUrl;
+                    localStorage.setItem('auraDashYoutubeUrl', embedUrl);
+                } else {
+                    youtubeSearchInput.placeholder = "No videos found.";
+                }
+            } catch (error) {
+                console.error("Error fetching YouTube video:", error);
+                youtubeSearchInput.placeholder = "Error searching.";
+            }
+        }
+
+        youtubeSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && youtubeSearchInput.value.trim() !== '') {
+                searchAndPlayYoutube(youtubeSearchInput.value.trim());
+            }
+        });
+
+        const loadYoutubeUrl = () => {
+            const savedUrl = localStorage.getItem('auraDashYoutubeUrl');
+            if (savedUrl) {
+                youtubePlayer.src = savedUrl;
+            } else {
+                // Set a default calming video
+                youtubePlayer.src = "https://www.youtube.com/embed/jfKfPfyJRdk";
+            }
+        };
+
+
+        // --- Gemini Assistant ---
+        const geminiSubmitBtn = document.getElementById('gemini-submit');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        const geminiInputEl = document.getElementById('gemini-input');
+        
+        geminiSubmitBtn.addEventListener('click', async () => {
+            const prompt = geminiInputEl.value.trim();
+            if (!prompt) return;
+
+            geminiSubmitBtn.disabled = true;
+            geminiSubmitBtn.textContent = "Thinking...";
+            geminiResponseEl.textContent = "Generating response...";
+
+            try {
+                const responseText = await callGeminiApi(prompt);
+                geminiResponseEl.textContent = responseText;
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                geminiResponseEl.textContent = "Sorry, an error occurred.";
+            } finally {
+                geminiSubmitBtn.disabled = false;
+                geminiSubmitBtn.textContent = "Ask Gemini";
+            }
+        });
+        
+        async function callGeminiApi(prompt) {
+            const apiKey = ""; // Canvas provides this
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+            let response;
+            let retries = 3, delay = 1000;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                    throw new Error(`API request failed with status ${response.status}`);
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i < retries - 1) await new Promise(resolve => setTimeout(resolve, delay *= 2));
+                    else throw error;
+                }
+            }
+            throw new Error("All API retries failed.");
+        }
+
+        // --- Initial Load Function ---
+        const initializeDashboard = () => {
+            loadTasks();
+            carryOverTasks();
+            displayDate(currentDate);
+            renderTasks();
+            loadYoutubeUrl();
+        };
+
+        initializeDashboard();
+    });
+    </script>
+</body>
+</html>

@@ -29,7 +29,6 @@
             justify-content: center;
             padding: 3rem 2rem;
             position: relative;
-            /* overflow: hidden; <-- This was the issue, it has been removed */
         }
 
         .background-shapes div {
@@ -505,13 +504,16 @@
         // --- YouTube Player ---
         const youtubePlayer = document.getElementById('youtube-player');
         const youtubeSearchInput = document.getElementById('youtube-search-input');
-        const YOUTUBE_API_KEY = ""; // IMPORTANT: Add your YouTube Data API Key here
+        
+        // =======================================================================
+        // IMPORTANT: PASTE YOUR YOUTUBE API KEY HERE
+        // =======================================================================
+        const YOUTUBE_API_KEY = "AIzaSyB9ypBnuHbIP0akm4QBnaiBDr9NL-FEfeM"; // <-- PASTE YOUR KEY BETWEEN THE QUOTES
 
         async function searchAndPlayYoutube(query) {
             if (!YOUTUBE_API_KEY) {
-                // Fallback: Open search results in a new tab if no API key
-                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
-                youtubeSearchInput.placeholder = "Add API Key to enable search";
+                youtubeSearchInput.value = "";
+                youtubeSearchInput.placeholder = "Add your API Key in the code to search!";
                 return;
             }
             
@@ -545,7 +547,6 @@
             if (savedUrl) {
                 youtubePlayer.src = savedUrl;
             } else {
-                // Set a default calming video
                 youtubePlayer.src = "https://www.youtube.com/embed/jfKfPfyJRdk";
             }
         };
@@ -557,15 +558,29 @@
         const geminiInputEl = document.getElementById('gemini-input');
         
         geminiSubmitBtn.addEventListener('click', async () => {
-            const prompt = geminiInputEl.value.trim();
-            if (!prompt) return;
+            const userPrompt = geminiInputEl.value.trim();
+            if (!userPrompt) return;
 
             geminiSubmitBtn.disabled = true;
             geminiSubmitBtn.textContent = "Thinking...";
             geminiResponseEl.textContent = "Generating response...";
 
+            // Get current tasks to provide as context
+            const dateKey = getFormattedDate(currentDate);
+            const currentTasks = tasks[dateKey] || [];
+            const taskContext = currentTasks.map(t => `- ${t.text} (${t.completed ? 'completed' : 'not completed'})`).join('\n');
+
+            // Create a more detailed prompt for Gemini
+            const fullPrompt = `
+                You are a helpful productivity assistant. 
+                Here is my current list of tasks for today:
+                ${taskContext.length > 0 ? taskContext : "I have no tasks yet."}
+
+                Based on this context, please answer my question: "${userPrompt}"
+            `;
+
             try {
-                const responseText = await callGeminiApi(prompt);
+                const responseText = await callGeminiApi(fullPrompt);
                 geminiResponseEl.textContent = responseText;
             } catch (error) {
                 console.error("Gemini API Error:", error);

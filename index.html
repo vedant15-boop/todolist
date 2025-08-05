@@ -38,7 +38,6 @@
             transition: background-image 1.5s ease-in-out;
         }
         
-        /* Overlay to ensure text readability */
         body::before {
             content: '';
             position: fixed;
@@ -115,20 +114,15 @@
         #youtube-results li { padding: 10px; cursor: pointer; border-radius: 8px; transition: background-color 0.2s; font-size: 0.9rem; }
         #youtube-results li:hover { background-color: rgba(0,0,0,0.05); }
 
-        /* --- Gemini Assistant --- */
-        #gemini-input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: #FFFFFF; color: var(--text-color); box-sizing: border-box; margin-bottom: 1rem; font-size: 1rem; min-height: 60px; font-family: 'Poppins', sans-serif; resize: vertical;}
-        #gemini-submit { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--accent-color); color: white; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color 0.2s; }
-        #gemini-submit:hover { background-color: #E53935; }
-        #gemini-submit:disabled { background-color: var(--subtle-text-color); cursor: not-allowed; }
-        #gemini-response { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; max-height: 200px; overflow-y: auto; }
+        /* --- News Section --- */
+        .news-header { display: flex; gap: 10px; margin-bottom: 1.5rem; align-items: center; }
+        .news-header label { font-weight: 500; }
+        #news-topic { padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; background: #FFFFFF; font-family: 'Poppins', sans-serif; flex-grow: 1;}
+        #news-list { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+        #news-list li a { text-decoration: none; color: var(--text-color); display: block; padding: 12px 5px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; transition: background-color 0.2s; border-radius: 8px; }
+        #news-list li a:hover { background-color: rgba(0,0,0,0.05); }
+        #news-list li:last-child a { border-bottom: none; }
 
-        /* --- Quick Links --- */
-        #quick-links-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 1rem; }
-        .quick-link-item { text-align: center; }
-        .quick-link-item a { display: flex; align-items: center; justify-content: center; background-color: #fff; width: 100%; height: 60px; border-radius: 10px; text-decoration: none; color: var(--accent-color); font-weight: 600; font-size: 1.5rem; transition: transform 0.2s; box-sizing: border-box; }
-        .quick-link-item a:hover { transform: scale(1.1); }
-        #add-link-btn { background: none; border: 2px dashed var(--border-color); color: var(--subtle-text-color); width: 100%; height: 60px; border-radius: 10px; cursor: pointer; font-size: 2rem; transition: background-color 0.2s, color 0.2s; }
-        #add-link-btn:hover { background-color: var(--border-color); color: var(--text-color); }
 
         /* --- Responsive Design --- */
         @media (max-width: 900px) { .dashboard-container { grid-template-columns: 1fr; } .todo-section, .widgets-column { grid-column: 1 / -1; } }
@@ -160,17 +154,17 @@
 
         <div class="widgets-column">
             <div class="content-section">
-                 <h2 class="section-title">Gemini Assistant</h2>
-                 <div>
-                     <textarea id="gemini-input" placeholder="Ask anything..." rows="3"></textarea>
-                     <button id="gemini-submit">Ask Gemini</button>
-                 </div>
-                 <div id="gemini-response">Ask a question to see the response here.</div>
-            </div>
-
-            <div class="content-section">
-                <h2 class="section-title">Quick Links</h2>
-                <ul id="quick-links-list"></ul>
+                <div class="news-header">
+                    <label for="news-topic" class="section-title" style="margin-bottom: 0;">News:</label>
+                    <select id="news-topic">
+                        <option value="technology">Technology</option>
+                        <option value="business">Business</option>
+                        <option value="science">Science</option>
+                        <option value="health">Health</option>
+                        <option value="sports">Sports</option>
+                    </select>
+                </div>
+                <ul id="news-list"></ul>
             </div>
 
             <div class="content-section">
@@ -196,15 +190,12 @@
         const youtubePlayer = document.getElementById('youtube-player');
         const youtubeSearchInput = document.getElementById('youtube-search-input');
         const youtubeResultsEl = document.getElementById('youtube-results');
-        const geminiSubmitBtn = document.getElementById('gemini-submit');
-        const geminiResponseEl = document.getElementById('gemini-response');
-        const geminiInputEl = document.getElementById('gemini-input');
-        const quickLinksList = document.getElementById('quick-links-list');
+        const newsTopicSelect = document.getElementById('news-topic');
+        const newsList = document.getElementById('news-list');
 
         // --- State ---
         let currentDate = new Date();
         let tasks = {};
-        let quickLinks = [];
 
         // --- Dynamic Background & Theme ---
         const themes = [
@@ -323,32 +314,33 @@
             localStorage.setItem('auraDashLastVisit', today);
         };
 
-        // --- Quick Links ---
-        const saveQuickLinks = () => localStorage.setItem('auraDashQuickLinks', JSON.stringify(quickLinks));
-        const loadQuickLinks = () => { quickLinks = JSON.parse(localStorage.getItem('auraDashQuickLinks') || '[]'); };
-        const renderQuickLinks = () => {
-            quickLinksList.innerHTML = '';
-            quickLinks.forEach((link) => {
-                const nameInitial = link.name.charAt(0).toUpperCase();
-                const li = document.createElement('li');
-                li.className = 'quick-link-item';
-                li.innerHTML = `<a href="${link.url}" target="_blank" title="${link.name}">${nameInitial}</a>`;
-                quickLinksList.appendChild(li);
-            });
-            const addButtonLi = document.createElement('li');
-            addButtonLi.className = 'quick-link-item';
-            addButtonLi.innerHTML = `<button id="add-link-btn">+</button>`;
-            quickLinksList.appendChild(addButtonLi);
-            document.getElementById('add-link-btn').addEventListener('click', () => {
-                const name = prompt("Enter a name for the link:");
-                if (!name) return;
-                const url = prompt("Enter the full URL (e.g., https://example.com):");
-                if (!url) return;
-                quickLinks.push({ name, url });
-                saveQuickLinks();
-                renderQuickLinks();
-            });
-        };
+        // --- News Feed ---
+        const NEWS_API_KEY = "3db2d68c1d894cc6af393cf9e656c7ad"; // <-- PASTE YOUR NEWSAPI.ORG KEY HERE
+        async function fetchNews(topic) {
+            if (!NEWS_API_KEY) {
+                newsList.innerHTML = `<li>Please add a NewsAPI.org key in the code to fetch news.</li>`;
+                return;
+            }
+            const url = `https://newsapi.org/v2/top-headlines?country=us&category=${topic}&apiKey=${NEWS_API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                newsList.innerHTML = '';
+                if (data.status === 'ok' && data.articles.length > 0) {
+                    data.articles.slice(0, 10).forEach(article => { // Show top 10
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
+                        newsList.appendChild(li);
+                    });
+                } else {
+                    newsList.innerHTML = '<li>Could not fetch news.</li>';
+                }
+            } catch (error) {
+                console.error("Error fetching news:", error);
+                newsList.innerHTML = '<li>Could not fetch news.</li>';
+            }
+        }
+        newsTopicSelect.addEventListener('change', (e) => fetchNews(e.target.value));
 
         // --- YouTube Player ---
         const YOUTUBE_API_KEY = ""; // <-- PASTE YOUR YOUTUBE DATA API v3 KEY HERE
@@ -392,44 +384,6 @@
             youtubePlayer.src = savedUrl || "https://www.youtube.com/embed/jfKfPfyJRdk";
         };
 
-        // --- Gemini Assistant ---
-        geminiSubmitBtn.addEventListener('click', async () => {
-            const userPrompt = geminiInputEl.value.trim();
-            if (!userPrompt) return;
-            geminiSubmitBtn.disabled = true;
-            geminiSubmitBtn.textContent = "Thinking...";
-            geminiResponseEl.textContent = "Generating response...";
-            const dateKey = getFormattedDate(currentDate);
-            const taskContext = (tasks[dateKey] || []).map(t => `- ${t.text} (priority: ${t.priority}, status: ${t.completed ? 'completed' : 'not completed'})`).join('\n');
-            const fullPrompt = `You are a helpful productivity assistant. Here is my current list of tasks for today:\n${taskContext.length > 0 ? taskContext : "I have no tasks yet."}\n\nBased on this context, please answer my question: "${userPrompt}"`;
-            try {
-                const responseText = await callGeminiApi(fullPrompt);
-                geminiResponseEl.textContent = responseText;
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                if (error.message.includes("403")) {
-                     geminiResponseEl.textContent = "Sorry, there's a permission error (403). Please ensure the Generative Language API is enabled for your API key in the Google Cloud Console.";
-                } else {
-                     geminiResponseEl.textContent = "Sorry, an error occurred. Please check the console for details.";
-                }
-            } finally {
-                geminiSubmitBtn.disabled = false;
-                geminiSubmitBtn.textContent = "Ask Gemini";
-            }
-        });
-        async function callGeminiApi(prompt) {
-            const apiKey = ""; // Provided by Canvas
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
-            const result = await response.json();
-            if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content.parts) {
-                 throw new Error("Invalid response structure from API.");
-            }
-            return result.candidates[0].content.parts[0].text;
-        }
-
         // --- Initial Load Function ---
         const initializeDashboard = () => {
             loadTasks();
@@ -437,8 +391,7 @@
             displayDate(currentDate);
             renderTasks();
             loadYoutubeUrl();
-            loadQuickLinks();
-            renderQuickLinks();
+            fetchNews(newsTopicSelect.value); // Fetch initial news
             
             // Set initial theme smoothly and preload others
             changeTheme(true); 
